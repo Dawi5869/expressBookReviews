@@ -52,16 +52,29 @@ regd_users.post("/login", (req,res) => {
 regd_users.put("/auth/review/:isbn", (req, res) => {
     let username = req.session.username;
     let isbn = req.params.isbn;
-    let review = books[isbn][reviews][username];
+    let review = books[isbn]["reviews"][username];
     let new_review = req.query.review;
     if(review) {
-        review += new_review;
-        res.send(books[isbn])
+        books[isbn]["reviews"][username] = new_review;
+        
     } else {
-        books[isbn]["reviews"] += {username: new_review}
+        books[isbn]["reviews"][username] = new_review;
+        
     }
-    
+    res.send(books[isbn]);
 });
+
+regd_users.delete("/auth/review/:isbn", (req,res) => {
+    let isbn = req.params.isbn;
+    let username = req.session.username;
+    if(books[isbn]["reviews"][username]) {
+        delete books[isbn]["reviews"][username];
+        res.send(`${username}'s book review deleted. \n ` + JSON.stringify(books[isbn])); 
+        
+    } else {
+        res.send("This user has not posted a review.")
+    }
+})
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
